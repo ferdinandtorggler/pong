@@ -46,8 +46,8 @@ io.sockets.on('connection', function (socket) {
     var startGame = function (ballposition) {
 
         // reset speed
-        xOffset = 1;
-        yOffset = 1;
+        xOffset = Math.random()*2;
+        yOffset = Math.random()*2;
 
         if (!gameloop && player1 && player2) {
 
