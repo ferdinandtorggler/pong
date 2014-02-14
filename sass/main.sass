@@ -3,13 +3,21 @@ $handle-width: 20px
 
 $ball-size: 12px
 
-$foreground-color: #CCCCCC
+$foreground-color: #AAAAAA
 $background-color: #111111
 
+@font-face
+    font-family: 'digitalix'
+    src: url('digitalix.ttf')
+
 html, body, #game
-    height: 100%
+    height: 700px
+    width: 700px
+    position: relative
     margin: 0
     padding: 0
+
+#game
     background-color: $background-color
 
 %control
@@ -36,3 +44,11 @@ html, body, #game
     margin-left: -$ball-size/2
     margin-top: -$ball-size/2
     background-color: $foreground-color
+
+#score
+    position: absolute
+    top: 10px
+    left: 50%
+    margin-left: -50px
+    font-family: 'digitalix', sans-serif
+    color: $foreground-color

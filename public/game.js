@@ -1,4 +1,4 @@
-(function (window) {
+document.addEventListener('DOMContentLoaded', function () {
 
     var
       handleHeight  = 100,
@@ -14,12 +14,14 @@
 
     socket.on('player', function (data) {
         me = (data.player === 1) ?  player1 : player2;
+        me.style.backgroundColor = '#FFFFFF';
         console.log('this is', me.id);
     });
 
     var
-      width  = window.innerWidth,
-      height = window.innerHeight;
+      width  = parseInt(getComputedStyle(document.getElementById('game')).width, 10),
+      height = parseInt(getComputedStyle(document.getElementById('game')).height, 10);
+
 
     // must be available as inline styles
     player1.style.top   = height/2 + 'px';
@@ -47,13 +49,13 @@
     };
 
     var moveHandleUp = function (handle) {
-        if (playerTop(me) - handleHeight/2 <= 0) return;
+        if (playerTop(me)  <= 0) return;
         setPlayerTop(handle, playerTop(handle) - 10);
         reportHandleChange();
     };
 
     var moveHandleDown = function (handle) {
-        if (playerTop(me) + handleHeight/2 >= height) return;
+        if (playerTop(me) + handleHeight >= height) return;
         setPlayerTop(handle, playerTop(handle) + 10);
         reportHandleChange();
     };
@@ -66,10 +68,6 @@
             }
             case 40: {
                 moveHandleDown(me);
-                break;
-            }
-            case 32: {
-                socket.emit('game over');
                 break;
             }
         }
@@ -100,9 +98,17 @@
         if (data.y <= ballRadius || data.y >= height - ballRadius)
             socket.emit('hit wall');
 
-        if (data.x < ballRadius || data.x > width - ballRadius)
-            socket.emit('game over');
+        if (data.x < ballRadius)
+            socket.emit('scored', {player: 2});
 
+        if (data.x > width - ballRadius)
+            socket.emit('scored', {player: 1});
+
+    });
+
+    socket.on('score', function (score) {
+        document.getElementById('score1').innerHTML = score.player1;
+        document.getElementById('score2').innerHTML = score.player2;
     });
 
     socket.on('handle change', function (data) {
@@ -110,4 +116,4 @@
         if (data.player2) setPlayerTop(player2, data.player2);
     });
 
-})(window);
+});
