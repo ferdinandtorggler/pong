@@ -17,7 +17,7 @@ app.get('/', function(req, res) {
 });
 
 
-var io = socketIO.listen(app.listen(3000));
+var io = socketIO.listen(app.listen(process.env.PORT || 3000));
 io.set('log level', 1);
 
 io.sockets.on('connection', function (socket) {
