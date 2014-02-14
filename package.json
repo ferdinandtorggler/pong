@@ -1,0 +1,21 @@
+{
+  "name": "pong",
+  "version": "0.0.0",
+  "description": "Pong game with websockets",
+  "dependencies": {
+    "express": "~3.4.8",
+    "grunt": "~0.4.2",
+    "grunt-contrib-sass": "~0.7.2",
+    "grunt-contrib-watch": "~0.5.3",
+    "jade": "~1.1.5",
+    "nodemon": "~1.0.14",
+    "socket.io": "~0.9.16"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "BSD-2-Clause"
+}
