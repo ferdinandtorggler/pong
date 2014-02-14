@@ -80,28 +80,28 @@ document.addEventListener('DOMContentLoaded', function () {
         y: parseInt(ball.style.top, 10)
     });
 
-    socket.on('ballmove', function (data) {
-        setPlayerTop(ball, data.y);
-        setPlayerLeft(ball, data.x);
+    socket.on('ballmove', function (ball) {
+        setPlayerTop(ball, ball.y);
+        setPlayerLeft(ball, ball.x);
 
-        var player1Touches = (  (data.x - ballRadius >= 0) && (data.x - ballRadius <= handleWidth + ballRadius)
-                             && (data.y > playerTop(player1) - handleHeight/2)
-                             && (data.y < (playerTop(player1) + handleHeight)));
+        var player1Touches = (  (ball.x - ballRadius <= handleWidth)
+                             && (ball.y > playerTop(player1) - handleHeight/2)
+                             && (ball.y < (playerTop(player1) + handleHeight)));
 
-        var player2Touches = (  (data.x + ballRadius >= (width - handleWidth)) && (data.x + ballRadius < width)
-                                && (data.y > playerTop(player2) - handleHeight/2)
-                                && (data.y < (playerTop(player2) + handleHeight)));
+        var player2Touches = (  (ball.x + ballRadius >= (width - handleWidth))
+                             && (ball.y > playerTop(player2) - handleHeight/2)
+                             && (ball.y < (playerTop(player2) + handleHeight)));
 
         if (player1Touches || player2Touches)
             socket.emit('hit handle');
 
-        if (data.y <= ballRadius || data.y >= height - ballRadius)
+        if (ball.y <= ballRadius || ball.y >= height - ballRadius)
             socket.emit('hit wall');
 
-        if (data.x < ballRadius)
+        if (ball.x < ballRadius)
             socket.emit('scored', {player: 2});
 
-        if (data.x > width - ballRadius)
+        if (ball.x > width - ballRadius)
             socket.emit('scored', {player: 1});
 
     });
