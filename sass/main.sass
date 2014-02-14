@@ -1,0 +1,38 @@
+$handle-height: 100px
+$handle-width: 20px
+
+$ball-size: 12px
+
+$foreground-color: #CCCCCC
+$background-color: #111111
+
+html, body, #game
+    height: 100%
+    margin: 0
+    padding: 0
+    background-color: $background-color
+
+%control
+    position: absolute
+    background-color: $foreground-color
+
+.handle
+    @extend %control
+    width: $handle-width
+    height: $handle-height
+
+#player1
+    left: 0
+
+#player2
+    right: 0
+
+#ball
+    @extend %control
+    top: 50%
+    left: 50%
+    width: $ball-size
+    height: $ball-size
+    margin-left: -$ball-size/2
+    margin-top: -$ball-size/2
+    background-color: $foreground-color
