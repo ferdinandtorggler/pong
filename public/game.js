@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
       handleWidth   = 20,
       ballRadius    = 6,
 
-      socket        = io.connect('http://localhost:3000'),
+      socket        = io.connect(),
 
       player1       = document.getElementById('player1'),
       player2       = document.getElementById('player2'),
