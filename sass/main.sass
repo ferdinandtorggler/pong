@@ -32,10 +32,25 @@ html, body, #game
     @extend %control
     background-color: $foreground-color
 
-#score
+#divider
+    height: 100%
+    width: 0
+    margin: auto auto
+    border-left: dashed 3px $foreground-color
+
+%score
     position: absolute
-    top: 10px
-    left: 50%
-    margin-left: -50px
+    top: 50px
+    width: 50%
     font-family: 'digitalix', sans-serif
+    font-size: 70px
     color: $foreground-color
+    text-align: center
+
+#score1
+    @extend %score
+    left: 0
+
+#score2
+    @extend %score
+    right: 0

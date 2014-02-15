@@ -25,10 +25,23 @@ html, body, #game {
 #ball {
   background-color: #aaaaaa; }
 
-#score {
+#divider {
+  height: 100%;
+  width: 0;
+  margin: auto auto;
+  border-left: dashed 3px #aaaaaa; }
+
+#score1, #score2 {
   position: absolute;
-  top: 10px;
-  left: 50%;
-  margin-left: -50px;
+  top: 50px;
+  width: 50%;
   font-family: "digitalix", sans-serif;
-  color: #aaaaaa; }
+  font-size: 70px;
+  color: #aaaaaa;
+  text-align: center; }
+
+#score1 {
+  left: 0; }
+
+#score2 {
+  right: 0; }

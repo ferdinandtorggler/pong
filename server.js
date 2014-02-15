@@ -50,6 +50,11 @@ io.sockets.on('connection', function (socket) {
 
     var resetGame = function () {
         console.log('stopping game...');
+        player1 = {height: 0};
+        player2 = {height: 0};
+        ball = {x: 0, y: 0};
+        offset = {x: 0, y: 0};
+        score = {player1: 0, player2: 0};
         clearInterval(gameloop);
         gameloop = undefined;
         client1 = undefined;
@@ -57,8 +62,8 @@ io.sockets.on('connection', function (socket) {
     };
 
     var resetBall = function () {
-        offset.x = .1;
-        offset.y = .1;
+        offset.x = .2;
+        offset.y = .2;
         if (Math.random() > 0.5) offset.x = -offset.x;
         if (Math.random() > 0.5) offset.y = -offset.y;
         resetBallPosition();
@@ -75,9 +80,11 @@ io.sockets.on('connection', function (socket) {
     if (client1 === undefined) {
         client1 = socket;
         socket.emit('player', metaData(1));
+        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     } else if (client2 === undefined) {
         client2 = socket;
         socket.emit('player', metaData(2));
+        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     } else {
         resetGame();
     }
