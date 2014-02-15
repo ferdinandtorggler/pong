@@ -4,9 +4,10 @@ var
   express = require('express'),
   socketIO = require('socket.io'),
   jade = require('jade'),
-  app = express();
+  app = express(),
 
-var player1, player2;
+  client1,
+  client2;
 
 app.configure (function () {
     app.use(express.static('public'));
@@ -20,96 +21,138 @@ app.get('/', function(req, res) {
 var io = socketIO.listen(app.listen(process.env.PORT || 3000));
 io.set('log level', 1);
 
+
+var
+  ball = {x: 0, y: 0},
+  offset = {x: 0, y: 0},
+
+  handleHeight  = 20,
+  handleWidth   = 4,
+  ballSize    = 4,
+
+  width  = 100,
+  height = 100,
+
+  player1 = {height: 0},
+  player2 = {height: 0},
+
+  ballposition = {x: width/2 - ballSize/2, y: height/2 - ballSize/2},
+  score = {player1: 0, player2: 0},
+
+  gameloop;
+
 io.sockets.on('connection', function (socket) {
 
-    var ballX,
-        ballY,
-        xOffset,
-        yOffset,
-        gameloop,
-        ballposition,
-        score = {player1: 0, player2: 0};
+    var resetBallPosition = function () {
+        ball.x = ballposition.x;
+        ball.y = ballposition.y;
+    };
 
-    if (player1 === undefined) {
-        player1 = true;
-        socket.emit('player', {player: 1});
-    } else if (player2 === undefined) {
-        player2 = true;
-        socket.emit('player', {player: 2});
-    } else {
+    var resetGame = function () {
+        console.log('stopping game...');
         clearInterval(gameloop);
         gameloop = undefined;
-        player1 = undefined;
-        player2 = undefined;
-    }
-
-    var startGame = function (ballposition) {
-
-        // reset speed
-        xOffset = Math.random()*2;
-        yOffset = Math.random()*2;
-
-        if (!gameloop && player1 && player2) {
-
-            if (ballX === undefined && ballY === undefined) {
-                ballX = ballposition.x;
-                ballY = ballposition.y;
-            }
-
-            if (Math.random() > 0.5) xOffset = -xOffset;
-            if (Math.random() > 0.5) yOffset = -yOffset;
-
-            gameloop = setInterval( function () {
-                ballX += xOffset;
-                ballY += yOffset;
-                io.sockets.emit('ballmove', { x: ballX, y: ballY });
-            }, 1000/60);
-        }
+        client1 = undefined;
+        client2 = undefined;
     };
 
     var resetBall = function () {
-        xOffset = 1;
-        yOffset = 1;
-        if (Math.random() > 0.5) xOffset = -xOffset;
-        if (Math.random() > 0.5) yOffset = -yOffset;
-        ballX = ballposition.x;
-        ballY = ballposition.y;
+        offset.x = .1;
+        offset.y = .1;
+        if (Math.random() > 0.5) offset.x = -offset.x;
+        if (Math.random() > 0.5) offset.y = -offset.y;
+        resetBallPosition();
     };
 
-    socket.on('ballposition', function (data) {
-        ballposition = data;
-        startGame(ballposition);
+    var metaData = function (player) {
+        return { handleHeight: handleHeight,
+                 handleWidth: handleWidth,
+                 ballSize: ballSize,
+                 player: player
+               };
+    };
+
+    if (client1 === undefined) {
+        client1 = socket;
+        socket.emit('player', metaData(1));
+    } else if (client2 === undefined) {
+        client2 = socket;
+        socket.emit('player', metaData(2));
+    } else {
+        resetGame();
+    }
+
+    var moveHandle = function (player, amount) {
+        player.height += amount;
+    };
+
+    socket.on('move handle up', function (data) {
+        moveHandle(((data.player === 1) ? player1 : player2), -2);
+        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     });
 
-    socket.on('hit handle', function () {
-
-        // accelerate ball
-        xOffset += (xOffset * 0.25);
-        yOffset += (yOffset * 0.25);
-
-        xOffset = -xOffset;
+    socket.on('move handle down', function (data) {
+        moveHandle(((data.player === 1) ? player1 : player2), 2);
+        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     });
 
-    socket.on('hit wall', function () {
-        yOffset = -yOffset;
-    });
+    var tick = function () {
+        ball.x += offset.x;
+        ball.y += offset.y;
 
-    socket.on('scored', function (data) {
-        score['player' + data.player] += 1;
-        io.sockets.emit('score', score);
+        var player1Touches = ( (ball.x <= handleWidth)
+                            && (ball.y > player1.height)
+                            && (ball.y < player1.height + handleHeight));
+
+        var player2Touches = ( (ball.x + ballSize >= (width - handleWidth))
+                            && (ball.y > player2.height)
+                            && (ball.y < player2.height + handleHeight));
+
+
+        if (player1Touches || player2Touches) {
+
+            // accelerate ball
+            var amount = 0.2;
+            if (offset.x < 2) {
+                offset.x += (offset.x < 0) ? -amount : amount;
+                offset.y += (offset.x < 0) ? -amount : amount;
+            }
+
+            offset.x = -offset.x;
+            console.log('invert x');
+        }
+
+        if (ball.y <= 0 || ball.y + ballSize >= height) {
+            offset.y = -offset.y;
+        }
+
+        if (ball.x <= 0) {
+            score.player2 += 1;
+            io.sockets.emit('score', score);
+            resetBall();
+        }
+
+        if (ball.x + ballSize >= width) {
+            score.player1 += 1;
+            io.sockets.emit('score', score);
+            resetBall();
+        }
+
+        io.sockets.emit('ballmove', { x: ball.x, y: ball.y });
+    };
+
+    resetBall();
+
+    if (!gameloop && client1 && client2) {
+        console.log('players connected, starting game...');
+
         resetBall();
-    });
 
-    socket.on('user handle change', function (data) {
-        socket.broadcast.emit('handle change', data);
-    });
+        gameloop = setInterval(tick, 1000/60);
+    }
 
     socket.on('disconnect', function () {
-        console.log('resetting everything');
-        clearInterval(gameloop);
-        player1 = undefined;
-        player2 = undefined;
-        gameloop = undefined;
+        resetGame();
     });
 
 });

@@ -3,8 +3,8 @@
   src: url("digitalix.ttf"); }
 
 html, body, #game {
-  height: 700px;
-  width: 700px;
+  height: 400px;
+  width: 400px;
   position: relative;
   margin: 0;
   padding: 0; }
@@ -17,8 +17,8 @@ html, body, #game {
   background-color: #aaaaaa; }
 
 .handle {
-  width: 20px;
-  height: 100px; }
+  width: 4px;
+  height: 20px; }
 
 #player1 {
   left: 0; }
@@ -27,12 +27,8 @@ html, body, #game {
   right: 0; }
 
 #ball {
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 12px;
-  margin-left: -6px;
-  margin-top: -6px;
+  width: 4px;
+  height: 4px;
   background-color: #aaaaaa; }
 
 #score {

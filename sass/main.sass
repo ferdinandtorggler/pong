@@ -1,7 +1,7 @@
-$handle-height: 100px
-$handle-width: 20px
+$handle-height: 20px
+$handle-width: 4px
 
-$ball-size: 12px
+$ball-size: 4px
 
 $foreground-color: #AAAAAA
 $background-color: #111111
@@ -11,8 +11,8 @@ $background-color: #111111
     src: url('digitalix.ttf')
 
 html, body, #game
-    height: 700px
-    width: 700px
+    height: 400px
+    width: 400px
     position: relative
     margin: 0
     padding: 0
@@ -37,12 +37,8 @@ html, body, #game
 
 #ball
     @extend %control
-    top: 50%
-    left: 50%
     width: $ball-size
     height: $ball-size
-    margin-left: -$ball-size/2
-    margin-top: -$ball-size/2
     background-color: $foreground-color
 
 #score

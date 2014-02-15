@@ -1,73 +1,60 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     var
-      handleHeight  = 100,
-      handleWidth   = 20,
-      ballRadius    = 6,
-
       socket        = io.connect(),
+
+      game          = document.getElementById('game'),
 
       player1       = document.getElementById('player1'),
       player2       = document.getElementById('player2'),
       ball          = document.getElementById('ball'),
-      me;
+
+      score1       = document.getElementById('score1'),
+      score2       = document.getElementById('score2'),
+
+      me,
+
+      width         = parseInt(getComputedStyle(game).getPropertyValue('width'), 10),
+      height        = parseInt(getComputedStyle(game).getPropertyValue('height'), 10);
+
 
     socket.on('player', function (data) {
         me = (data.player === 1) ?  player1 : player2;
         me.style.backgroundColor = '#FFFFFF';
-        console.log('this is', me.id);
+
+        player1.style.width = data.handleWidth * widthScale + 'px';
+        player2.style.width = data.handleWidth * widthScale + 'px';
+
+        player1.style.height = data.handleHeight * heightScale + 'px';
+        player2.style.height = data.handleHeight * heightScale + 'px';
+
+        ball.style.width = data.ballSize * widthScale + 'px';
+        ball.style.height = data.ballSize * heightScale + 'px';
     });
 
-    var
-      width  = parseInt(getComputedStyle(document.getElementById('game')).width, 10),
-      height = parseInt(getComputedStyle(document.getElementById('game')).height, 10);
+    var widthScale = width / 100;
+    var heightScale = height / 100;
 
-
-    // must be available as inline styles
-    player1.style.top   = height/2 + 'px';
-    player2.style.top   = height/2 + 'px';
-
-    ball.style.top      = height/2 + 'px';
-    ball.style.left     = width/2  + 'px';
-
-    var playerTop = function (player) {
-        return parseInt(player.style.top, 10);
+    var translateBallPosition = function (pos) {
+        var x = Math.round(pos.x * widthScale);
+        var y = Math.round(pos.y * heightScale);
+        return {x: x, y: y};
     };
 
-    var setPlayerTop = function (player, top) {
-        player.style.top = Math.floor(top) + 'px';
-    };
-
-    var setPlayerLeft = function (player, left) {
-        player.style.left = Math.floor(left) + 'px';
-    };
-
-    var reportHandleChange = function () {
-        var top = playerTop(me);
-        var playerData = (me === player1) ? {player1: top} : {player2: top};
-        socket.emit('user handle change', playerData);
-    };
-
-    var moveHandleUp = function (handle) {
-        if (playerTop(me)  <= 0) return;
-        setPlayerTop(handle, playerTop(handle) - 10);
-        reportHandleChange();
-    };
-
-    var moveHandleDown = function (handle) {
-        if (playerTop(me) + handleHeight >= height) return;
-        setPlayerTop(handle, playerTop(handle) + 10);
-        reportHandleChange();
+    var translateHandleHeights = function (pos) {
+        var p1 = Math.round(pos.player1 * heightScale);
+        var p2 = Math.round(pos.player2 * heightScale);
+        return {player1: p1, player2: p2};
     };
 
     var handleListener = function (e) {
         switch (e.keyCode) {
             case 38: {
-                moveHandleUp(me);
+                socket.emit('move handle up', { player: ((me === player1) ? 1 : 2), amount: -2 });
                 break;
             }
             case 40: {
-                moveHandleDown(me);
+                socket.emit('move handle down', { player: ((me === player1) ? 1 : 2), amount: 2  });
                 break;
             }
         }
@@ -75,45 +62,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('keydown', handleListener);
 
-    socket.emit('ballposition', {
-        x: parseInt(ball.style.left, 10),
-        y: parseInt(ball.style.top, 10)
+    socket.on('handle positions', function (data) {
+        data = translateHandleHeights(data);
+        player1.style.top = data.player1 + 'px';
+        player2.style.top = data.player2 + 'px';
     });
 
-    socket.on('ballmove', function (ball) {
-        setPlayerTop(ball, ball.y);
-        setPlayerLeft(ball, ball.x);
-
-        var player1Touches = (  (ball.x - ballRadius <= handleWidth)
-                             && (ball.y > playerTop(player1) - handleHeight/2)
-                             && (ball.y < (playerTop(player1) + handleHeight)));
-
-        var player2Touches = (  (ball.x + ballRadius >= (width - handleWidth))
-                             && (ball.y > playerTop(player2) - handleHeight/2)
-                             && (ball.y < (playerTop(player2) + handleHeight)));
-
-        if (player1Touches || player2Touches)
-            socket.emit('hit handle');
-
-        if (ball.y <= ballRadius || ball.y >= height - ballRadius)
-            socket.emit('hit wall');
-
-        if (ball.x < ballRadius)
-            socket.emit('scored', {player: 2});
-
-        if (ball.x > width - ballRadius)
-            socket.emit('scored', {player: 1});
-
+    socket.on('ballmove', function (data) {
+        data = translateBallPosition(data);
+        ball.style.left = data.x + 'px';
+        ball.style.top = data.y + 'px';
     });
 
-    socket.on('score', function (score) {
-        document.getElementById('score1').innerHTML = score.player1;
-        document.getElementById('score2').innerHTML = score.player2;
-    });
-
-    socket.on('handle change', function (data) {
-        if (data.player1) setPlayerTop(player1, data.player1);
-        if (data.player2) setPlayerTop(player2, data.player2);
+    socket.on('score', function (data) {
+        score1.innerText = data.player1;
+        score2.innerText = data.player2;
     });
 
 });
