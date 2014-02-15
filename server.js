@@ -41,7 +41,7 @@ var
 
   gameloop,
 
-  SPEED = .4;
+  SPEED = .3;
 
 io.sockets.on('connection', function (socket) {
 
@@ -129,17 +129,7 @@ io.sockets.on('connection', function (socket) {
             var amount = 0.1;
             if (offset.x < 2) {
                 offset.x += (offset.x < 0) ? -amount : amount;
-                var direction = Math.random();
-                if (direction < .16667)
-                    offset.y = -offset.y*2;
-                else if (direction < .33333)
-                    offset.y = -offset.y;
-                else if (direction < .5)
-                    offset.y = -offset.y/2;
-                else if (direction < .66667)
-                    offset.y = offset.y/2;
-                else if (direction < .83333)
-                    offset.y = offset.y*2;
+                offset.y = SPEED * 2 * Math.random(); // arithmetic mean is SPEED
             }
 
             offset.x = -offset.x;
