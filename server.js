@@ -26,7 +26,7 @@ var
   ball = {x: 0, y: 0},
   offset = {x: 0, y: 0},
 
-  handleHeight  = 20,
+  handleHeight  = 10,
   handleWidth   = 2,
   ballSize    = 2,
 
@@ -123,7 +123,12 @@ io.sockets.on('connection', function (socket) {
             var amount = 0.1;
             if (offset.x < 2) {
                 offset.x += (offset.x < 0) ? -amount : amount;
-                offset.y += (offset.x < 0) ? -amount : amount;
+                offset.y += (offset.y < 0) ? -amount : amount;
+                var direction = Math.random();
+                if (direction < 0.333)
+                    offset.y = -offset.y
+                else if (direction < 0.666)
+                    offset.y = 0;
             }
 
             offset.x = -offset.x;
