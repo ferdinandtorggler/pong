@@ -1,8 +1,3 @@
-$handle-height: 20px
-$handle-width: 4px
-
-$ball-size: 4px
-
 $foreground-color: #AAAAAA
 $background-color: #111111
 
@@ -26,8 +21,6 @@ html, body, #game
 
 .handle
     @extend %control
-    width: $handle-width
-    height: $handle-height
 
 #player1
     left: 0
@@ -37,8 +30,6 @@ html, body, #game
 
 #ball
     @extend %control
-    width: $ball-size
-    height: $ball-size
     background-color: $foreground-color
 
 #score

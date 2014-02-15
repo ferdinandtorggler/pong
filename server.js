@@ -27,8 +27,8 @@ var
   offset = {x: 0, y: 0},
 
   handleHeight  = 20,
-  handleWidth   = 4,
-  ballSize    = 4,
+  handleWidth   = 2,
+  ballSize    = 2,
 
   width  = 100,
   height = 100,
@@ -83,7 +83,8 @@ io.sockets.on('connection', function (socket) {
     }
 
     var moveHandle = function (player, amount) {
-        player.height += amount;
+        if (player.height <= 0 && amount < 0 || player.height + handleHeight >= height && amount > 0) return;
+            player.height += amount;
     };
 
     socket.on('move handle up', function (data) {
@@ -112,7 +113,7 @@ io.sockets.on('connection', function (socket) {
         if (player1Touches || player2Touches) {
 
             // accelerate ball
-            var amount = 0.2;
+            var amount = 0.1;
             if (offset.x < 2) {
                 offset.x += (offset.x < 0) ? -amount : amount;
                 offset.y += (offset.x < 0) ? -amount : amount;

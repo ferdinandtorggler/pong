@@ -14,8 +14,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
       me,
 
-      width         = parseInt(getComputedStyle(game).getPropertyValue('width'), 10),
-      height        = parseInt(getComputedStyle(game).getPropertyValue('height'), 10);
+      width = window.innerWidth > innerHeight ? innerHeight : innerWidth,
+      height = width;
+
+
+    game.style.width = width + 'px';
+    game.style.height = height + 'px';
 
 
     socket.on('player', function (data) {

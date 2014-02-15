@@ -16,10 +16,6 @@ html, body, #game {
   position: absolute;
   background-color: #aaaaaa; }
 
-.handle {
-  width: 4px;
-  height: 20px; }
-
 #player1 {
   left: 0; }
 
@@ -27,8 +23,6 @@ html, body, #game {
   right: 0; }
 
 #ball {
-  width: 4px;
-  height: 4px;
   background-color: #aaaaaa; }
 
 #score {
