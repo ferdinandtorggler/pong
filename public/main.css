@@ -3,14 +3,14 @@
   src: url("digitalix.ttf"); }
 
 html, body, #game {
-  height: 400px;
-  width: 400px;
   position: relative;
   margin: 0;
   padding: 0;
   background-color: #111111; }
 
 #game {
+  height: 400px;
+  width: 400px;
   margin: auto auto; }
 
 .handle, #ball {
