@@ -39,7 +39,9 @@ var
   ballposition = {x: width/2 - ballSize/2, y: height/2 - ballSize/2},
   score = {player1: 0, player2: 0},
 
-  gameloop;
+  gameloop,
+
+  SPEED = .1;
 
 io.sockets.on('connection', function (socket) {
 
@@ -62,8 +64,8 @@ io.sockets.on('connection', function (socket) {
     };
 
     var resetBall = function () {
-        offset.x = .2;
-        offset.y = .2;
+        offset.x = SPEED;
+        offset.y = SPEED;
         if (Math.random() > 0.5) offset.x = -offset.x;
         if (Math.random() > 0.5) offset.y = -offset.y;
         resetBallPosition();
@@ -92,6 +94,10 @@ io.sockets.on('connection', function (socket) {
     var moveHandle = function (player, amount) {
         if (player.height <= 0 && amount < 0 || player.height + handleHeight >= height && amount > 0) return;
             player.height += amount;
+
+        // correct game field exceeding caused by non-pixel-value amounts
+        if (player.height < 0) player.height = 0;
+        if (player.height + handleHeight > height) player.height = height - handleHeight;
     };
 
     socket.on('move handle up', function (data) {
@@ -109,12 +115,12 @@ io.sockets.on('connection', function (socket) {
         ball.y += offset.y;
 
         var player1Touches = ( (ball.x <= handleWidth)
-                            && (ball.y > player1.height)
-                            && (ball.y < player1.height + handleHeight));
+                            && (ball.y + ballSize >= player1.height)
+                            && (ball.y <= player1.height + handleHeight));
 
         var player2Touches = ( (ball.x + ballSize >= (width - handleWidth))
-                            && (ball.y > player2.height)
-                            && (ball.y < player2.height + handleHeight));
+                            && (ball.y + ballSize >= player2.height)
+                            && (ball.y <= player2.height + handleHeight));
 
 
         if (player1Touches || player2Touches) {
@@ -123,12 +129,17 @@ io.sockets.on('connection', function (socket) {
             var amount = 0.1;
             if (offset.x < 2) {
                 offset.x += (offset.x < 0) ? -amount : amount;
-                offset.y += (offset.y < 0) ? -amount : amount;
                 var direction = Math.random();
-                if (direction < 0.333)
-                    offset.y = -offset.y
-                else if (direction < 0.666)
-                    offset.y = 0;
+                if (direction < .16667)
+                    offset.y = -offset.y*2;
+                else if (direction < .33333)
+                    offset.y = -offset.y;
+                else if (direction < .5)
+                    offset.y = -offset.y/2;
+                else if (direction < .66667)
+                    offset.y = offset.y/2;
+                else if (direction < .83333)
+                    offset.y = offset.y*2;
             }
 
             offset.x = -offset.x;
