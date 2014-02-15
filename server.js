@@ -41,7 +41,7 @@ var
 
   gameloop,
 
-  SPEED = .1;
+  SPEED = .4;
 
 io.sockets.on('connection', function (socket) {
 
