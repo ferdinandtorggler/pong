@@ -83,4 +83,14 @@ document.addEventListener('DOMContentLoaded', function () {
         score2.innerText = data.player2;
     });
 
+    socket.on('beep', function () {
+        if (window.HTMLAudioElement) {
+            var beep = new Audio('');
+            if(beep.canPlayType('audio/wav')) {
+                beep = new Audio('/beep.wav');
+                beep.play();
+            }
+        }
+    });
+
 });

@@ -7,10 +7,11 @@ html, body, #game {
   width: 400px;
   position: relative;
   margin: 0;
-  padding: 0; }
+  padding: 0;
+  background-color: #111111; }
 
 #game {
-  background-color: #111111; }
+  margin: auto auto; }
 
 .handle, #ball {
   position: absolute;

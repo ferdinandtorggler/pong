@@ -33,8 +33,8 @@ var
   width  = 100,
   height = 100,
 
-  player1 = {height: 0},
-  player2 = {height: 0},
+  player1 = {height: height/2 - handleHeight/2},
+  player2 = {height: height/2 - handleHeight/2},
 
   ballposition = {x: width/2 - ballSize/2, y: height/2 - ballSize/2},
   score = {player1: 0, player2: 0},
@@ -50,8 +50,8 @@ io.sockets.on('connection', function (socket) {
 
     var resetGame = function () {
         console.log('stopping game...');
-        player1 = {height: 0};
-        player2 = {height: 0};
+        player1 = {height: height/2 - handleHeight/2};
+        player2 = {height: height/2 - handleHeight/2};
         ball = {x: 0, y: 0};
         offset = {x: 0, y: 0};
         score = {player1: 0, player2: 0};
@@ -127,7 +127,7 @@ io.sockets.on('connection', function (socket) {
             }
 
             offset.x = -offset.x;
-            console.log('invert x');
+            io.sockets.emit('beep');
         }
 
         if (ball.y <= 0 || ball.y + ballSize >= height) {
