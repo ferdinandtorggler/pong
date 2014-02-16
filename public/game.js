@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var
       socket        = io.connect(),
 
-      game          = document.getElementById('game'),
+      stage          = document.getElementById('game'),
 
       player1       = document.getElementById('player1'),
       player2       = document.getElementById('player2'),
@@ -14,68 +14,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
       me,
 
-      width = window.innerWidth > innerHeight ? innerHeight : innerWidth,
-      height = width;
+      size = window.innerWidth > innerHeight ? innerHeight : innerWidth,
+      scale = size / 100;
 
+    stage.style.width = size + 'px';
+    stage.style.height = size + 'px';
 
-    game.style.width = width + 'px';
-    game.style.height = height + 'px';
+    // set up sound
 
-
-    socket.on('player', function (data) {
-        me = (data.player === 1) ?  player1 : player2;
-        me.style.backgroundColor = '#FFFFFF';
-
-        player1.style.width = data.handleWidth * widthScale + 'px';
-        player2.style.width = data.handleWidth * widthScale + 'px';
-
-        player1.style.height = data.handleHeight * heightScale + 'px';
-        player2.style.height = data.handleHeight * heightScale + 'px';
-
-        ball.style.width = data.ballSize * widthScale + 'px';
-        ball.style.height = data.ballSize * heightScale + 'px';
-    });
-
-    var widthScale = width / 100;
-    var heightScale = height / 100;
-
-    var translateBallPosition = function (pos) {
-        var x = Math.round(pos.x * widthScale);
-        var y = Math.round(pos.y * heightScale);
-        return {x: x, y: y};
-    };
-
-    var translateHandleHeights = function (pos) {
-        var p1 = Math.round(pos.player1 * heightScale);
-        var p2 = Math.round(pos.player2 * heightScale);
-        return {player1: p1, player2: p2};
-    };
-
-    var handleListener = function (e) {
-        switch (e.keyCode) {
-            case 38: {
-                socket.emit('move handle up', { player: ((me === player1) ? 1 : 2), amount: -2 });
-                break;
-            }
-            case 40: {
-                socket.emit('move handle down', { player: ((me === player1) ? 1 : 2), amount: 2  });
-                break;
-            }
+    var beep;
+    if (window.HTMLAudioElement) {
+        beep = new Audio('');
+        if(beep.canPlayType('audio/wav')) {
+            beep = new Audio('/beep.wav');
         }
+    }
+
+    // converts abstract server units to screen pixels
+    var toPixels = function (val) {
+        return val * scale;
     };
 
-    document.addEventListener('keydown', handleListener);
+    socket.on('start game', function (data) {
+        me = data.player;
+        ((me === 1) ?  player1 : player2).classList.add('me');
+
+        player1.style.width     = toPixels(data.handleWidth) + 'px';
+        player1.style.height    = toPixels(data.handleHeight) + 'px';
+
+        player2.style.width     = toPixels(data.handleWidth) + 'px';
+        player2.style.height    = toPixels(data.handleHeight) + 'px';
+
+        ball.style.width        = toPixels(data.ballSize) + 'px';
+        ball.style.height       = toPixels(data.ballSize) + 'px';
+    });
 
     socket.on('handle positions', function (data) {
-        data = translateHandleHeights(data);
-        player1.style.top = data.player1 + 'px';
-        player2.style.top = data.player2 + 'px';
+        player1.style.top = toPixels(data.player1) + 'px';
+        player2.style.top = toPixels(data.player2) + 'px';
     });
 
-    socket.on('ballmove', function (data) {
-        data = translateBallPosition(data);
-        ball.style.left = data.x + 'px';
-        ball.style.top = data.y + 'px';
+    socket.on('ball move', function (data) {
+        ball.style.left = toPixels(data.x) + 'px';
+        ball.style.top = toPixels(data.y) + 'px';
     });
 
     socket.on('score', function (data) {
@@ -83,14 +64,22 @@ document.addEventListener('DOMContentLoaded', function () {
         score2.innerText = data.player2;
     });
 
-    socket.on('beep', function () {
-        if (window.HTMLAudioElement) {
-            var beep = new Audio('');
-            if(beep.canPlayType('audio/wav')) {
-                beep = new Audio('/beep.wav');
-                beep.play();
-            }
-        }
+    socket.on('handle touched', function () {
+        beep.play();
     });
 
+    var keyboardControls = function (e) {
+        switch (e.keyCode) {
+            case 38: {
+                socket.emit('move handle up', me);
+                break;
+            }
+            case 40: {
+                socket.emit('move handle down', me);
+                break;
+            }
+        }
+    };
+
+    document.addEventListener('keydown', keyboardControls);
 });

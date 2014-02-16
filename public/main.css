@@ -17,6 +17,9 @@ html, body, #game {
   position: absolute;
   background-color: #aaaaaa; }
 
+.handle.me {
+  background-color: white; }
+
 #player1 {
   left: 0; }
 

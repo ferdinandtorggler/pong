@@ -81,11 +81,11 @@ io.sockets.on('connection', function (socket) {
 
     if (client1 === undefined) {
         client1 = socket;
-        socket.emit('player', metaData(1));
+        socket.emit('start game', metaData(1));
         io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     } else if (client2 === undefined) {
         client2 = socket;
-        socket.emit('player', metaData(2));
+        socket.emit('start game', metaData(2));
         io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     } else {
         resetGame();
@@ -100,13 +100,13 @@ io.sockets.on('connection', function (socket) {
         if (player.height + handleHeight > height) player.height = height - handleHeight;
     };
 
-    socket.on('move handle up', function (data) {
-        moveHandle(((data.player === 1) ? player1 : player2), -2);
+    socket.on('move handle up', function (player) {
+        moveHandle(((player === 1) ? player1 : player2), -2);
         io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     });
 
-    socket.on('move handle down', function (data) {
-        moveHandle(((data.player === 1) ? player1 : player2), 2);
+    socket.on('move handle down', function (player) {
+        moveHandle(((player === 1) ? player1 : player2), 2);
         io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
     });
 
@@ -133,7 +133,7 @@ io.sockets.on('connection', function (socket) {
             }
 
             offset.x = -offset.x;
-            io.sockets.emit('beep');
+            io.sockets.emit('handle touched');
         }
 
         if (ball.y <= 0 || ball.y + ballSize >= height) {
@@ -152,7 +152,7 @@ io.sockets.on('connection', function (socket) {
             resetBall();
         }
 
-        io.sockets.emit('ballmove', { x: ball.x, y: ball.y });
+        io.sockets.emit('ball move', { x: ball.x, y: ball.y });
     };
 
     resetBall();

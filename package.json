@@ -1,6 +1,6 @@
 {
   "name": "pong",
-  "version": "0.0.0",
+  "version": "0.1",
   "description": "Pong game with websockets",
   "dependencies": {
     "express": "~3.4.8",
@@ -17,5 +17,6 @@
     "start": "node server.js"
   },
   "author": "",
-  "license": "BSD-2-Clause"
+  "license": "BSD-2-Clause",
+  "engine": "node 0.10.x"
 }
