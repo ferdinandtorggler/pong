@@ -33,10 +33,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // converts abstract server units to screen pixels
     var toPixels = function (val) {
-        return val * scale;
+        return Math.round(val * scale);
     };
 
-    socket.on('start game', function (data) {
+    socket.on('start game', function () {
+        document.getElementById('waiting').classList.add('hidden');
+    });
+
+    socket.on('game data', function (data) {
+
         me = data.player;
         ((me === 1) ?  player1 : player2).classList.add('me');
 
@@ -82,5 +87,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    var oldX = 0;
+    var mouseControls = function (e) {
+        var HANDLE_STEP = toPixels(2);
+        var y = e.clientY;
+        var diff = y - oldX;
+        if (oldX === 0) oldX = y;
+        if (diff >= HANDLE_STEP) {
+            socket.emit('move handle down', {player: me, amount: diff / scale * 2});
+            oldX = y;
+        }
+        if (diff < 0 && -diff >= HANDLE_STEP) {
+            socket.emit('move handle up', {player: me, amount: diff / scale * 2});
+            oldX = y;
+        }
+    };
+
     document.addEventListener('keydown', keyboardControls);
+    document.addEventListener('mousemove', mouseControls);
 });

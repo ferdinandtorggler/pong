@@ -135,11 +135,11 @@ io.sockets.on('connection', function (socket) {
 
     if (client1 === undefined) {
         client1 = socket;
-        socket.emit('start game', startData(1));
+        socket.emit('game data', startData(1));
         sendHandlePositions();
     } else if (client2 === undefined) {
         client2 = socket;
-        socket.emit('start game', startData(2));
+        socket.emit('game data', startData(2));
         sendHandlePositions();
     } else {
         resetGame();
@@ -147,19 +147,23 @@ io.sockets.on('connection', function (socket) {
 
     var moveHandle = function (player, amount) {
         if (player.y <= 0 && amount < 0 || player.y + HANDLE_HEIGHT >= HEIGHT && amount > 0) return;
-            player.y += amount;
+        player.y += amount;
 
         if (player.y < 0) player.y = 0;
         if (player.y + HANDLE_HEIGHT > HEIGHT) player.y = HEIGHT - HANDLE_HEIGHT;
     };
 
-    socket.on('move handle up', function (player) {
-        moveHandle(((player === 1) ? player1 : player2), -HANDLE_STEP);
+    socket.on('move handle up', function (data) {
+        var player = (typeof data === 'number') ? data : data.player;
+        var amount = (typeof data === 'object' && data.amount) ? data.amount : HANDLE_STEP;
+        moveHandle(((player === 1) ? player1 : player2), amount);
         sendHandlePositions();
     });
 
-    socket.on('move handle down', function (player) {
-        moveHandle(((player === 1) ? player1 : player2), HANDLE_STEP);
+    socket.on('move handle down', function (data) {
+        var player = (typeof data === 'number') ? data : data.player;
+        var amount = (typeof data === 'object' && data.amount) ? data.amount : HANDLE_STEP;
+        moveHandle(((player === 1) ? player1 : player2), amount);
         sendHandlePositions();
     });
 
@@ -178,7 +182,7 @@ io.sockets.on('connection', function (socket) {
     newBall();
 
     if (!gameloop && client1 && client2) {
-        console.log('players connected, starting game...');
+        io.sockets.emit('start game');
         newBall();
         gameloop = setInterval(tick, 1000/60);
     }

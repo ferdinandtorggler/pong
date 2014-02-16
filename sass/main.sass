@@ -5,6 +5,9 @@ $background-color: #111111
     font-family: 'digitalix'
     src: url('digitalix.ttf')
 
+.hidden
+    display: none
+
 html, body, #game
     position: relative
     margin: 0
@@ -58,3 +61,11 @@ html, body, #game
 #score2
     @extend %score
     right: 0
+
+#waiting
+    position: absolute
+    left: 0
+    bottom: 0
+    font-size: 10px
+    font-family: 'digitalix', sans-serif
+    color: $foreground-color
