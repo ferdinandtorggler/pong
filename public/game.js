@@ -25,12 +25,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // set up sound
-    var beep;
+    var beepHandle, beepWall, beepScore;
     if (window.HTMLAudioElement) {
-        beep = new Audio('');
-        if(beep.canPlayType('audio/wav')) {
-            beep = new Audio('/beep.wav');
-        }
+        beepHandle = new Audio('/beepHandle.wav');
+        beepWall = new Audio('/beepWall.wav');
+        beepScore = new Audio('/beepScore.wav');
     }
 
     // converts abstract server units to screen pixels
@@ -72,10 +71,15 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.on('score', function (data) {
         score1.innerText = data.player1;
         score2.innerText = data.player2;
+        beepScore.play();
+    });
+
+    socket.on('wall touched', function () {
+        beepWall.play();
     });
 
     socket.on('handle touched', function () {
-        beep.play();
+        beepHandle.play();
     });
 
     var keyboardControls = function (e) {

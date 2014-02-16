@@ -78,6 +78,7 @@ var sendHandlePositions = function () {
 var bounceBackOnWallCollision = function () {
     if (ball.y <= 0 || ball.y + BALL_SIZE >= HEIGHT) {
         offset.y = -offset.y;
+        io.sockets.emit('wall touched');
     }
 };
 
