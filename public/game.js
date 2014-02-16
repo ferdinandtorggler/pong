@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
       size      = window.innerWidth > innerHeight ? innerHeight : innerWidth,
       scale     = size / 100,
 
+      handleHeight,
+
       me;
 
     // set up stage
@@ -44,6 +46,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         me = data.player;
         ((me === 1) ?  player1 : player2).classList.add('me');
+
+        handleHeight = data.handleHeight;
 
         player1.style.width     = toPixels(data.handleWidth) + 'px';
         player1.style.height    = toPixels(data.handleHeight) + 'px';
@@ -90,15 +94,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var oldX = 0;
     var mouseControls = function (e) {
         var HANDLE_STEP = toPixels(1);
-        var y = e.clientY;
+        var y = e.clientY - toPixels(handleHeight/2);
         var diff = y - oldX;
         if (oldX === 0) oldX = y;
-        if (diff >= HANDLE_STEP) {
-            socket.emit('move handle down', {player: me, amount: diff / scale * 1.25});
-            oldX = y;
-        }
-        if (diff < 0 && -diff >= HANDLE_STEP) {
-            socket.emit('move handle up', {player: me, amount: diff / scale * 1.25});
+        if (diff >= HANDLE_STEP || diff < 0 && -diff >= HANDLE_STEP) {
+            socket.emit('move handle', {player: me, y: y/scale });
             oldX = y;
         }
     };

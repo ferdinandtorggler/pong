@@ -2,6 +2,9 @@
   font-family: "digitalix";
   src: url("digitalix.ttf"); }
 
+* {
+  cursor: none; }
+
 .hidden {
   display: none; }
 
