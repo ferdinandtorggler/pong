@@ -1,13 +1,16 @@
 "use strict";
 
 var
-  express = require('express'),
-  socketIO = require('socket.io'),
-  jade = require('jade'),
-  app = express(),
+  express   = require('express'),
+  socketIO  = require('socket.io'),
+  jade      = require('jade'),
+  app       = express(),
 
   client1,
   client2;
+
+
+// setting up express
 
 app.configure (function () {
     app.use(express.static('public'));
@@ -18,150 +21,165 @@ app.get('/', function(req, res) {
 });
 
 
+// setting up socket.io
+
 var io = socketIO.listen(app.listen(process.env.PORT || 3000));
 io.set('log level', 1);
 
 
 var
-  ball = {x: 0, y: 0},
-  offset = {x: 0, y: 0},
+  WIDTH           = 100,
+  HEIGHT          = 100,
 
-  handleHeight  = 10,
-  handleWidth   = 2,
-  ballSize    = 2,
+  BALL_SIZE       = 2,
+  BALL_START    = { x: WIDTH/2 - BALL_SIZE/2, y: HEIGHT/2 - BALL_SIZE/2 },
+  HANDLE_HEIGHT   = 10,
+  HANDLE_WIDTH    = 2,
+  HANDLE_STEP     = 2,
 
-  width  = 100,
-  height = 100,
+  SPEED           = .3,
+  ACCELERATION    = .1,
 
-  player1 = {height: height/2 - handleHeight/2},
-  player2 = {height: height/2 - handleHeight/2},
+  ball            = { x: 0, y: 0 },
+  offset          = { x: 0, y: 0 },
 
-  ballposition = {x: width/2 - ballSize/2, y: height/2 - ballSize/2},
-  score = {player1: 0, player2: 0},
+  player1         = { y: HEIGHT/2 - HANDLE_HEIGHT/2 },
+  player2         = { y: HEIGHT/2 - HANDLE_HEIGHT/2 },
 
-  gameloop,
+  score           = { player1: 0, player2: 0 },
 
-  SPEED = .3;
+  gameloop;
+
+
+var newBall = function () {
+    offset.x = SPEED;
+    offset.y = SPEED;
+    if (Math.random() > 0.5) offset.x = -offset.x;
+    if (Math.random() > 0.5) offset.y = -offset.y;
+    ball.x = BALL_START.x;
+    ball.y = BALL_START.y;
+};
+
+var resetGame = function () {
+    clearInterval(gameloop);
+    gameloop = undefined;
+    client1 = undefined;
+    client2 = undefined;
+    player1 = {y: HEIGHT/2 - HANDLE_HEIGHT/2};
+    player2 = {y: HEIGHT/2 - HANDLE_HEIGHT/2};
+    score = {player1: 0, player2: 0};
+    newBall()
+};
+
+var sendHandlePositions = function () {
+    io.sockets.emit('handle positions', {player1: player1.y, player2: player2.y});
+};
+
+var bounceBackOnWallCollision = function () {
+    if (ball.y <= 0 || ball.y + BALL_SIZE >= HEIGHT) {
+        offset.y = -offset.y;
+    }
+};
+
+var updateScoreIfScored = function () {
+    // when the ball reaches the left end, player 2 scores
+    if (ball.x <= 0) {
+        score.player2 += 1;
+        io.sockets.emit('score', score);
+        newBall();
+    }
+
+    // when the ball reaches the right end, player 1 scores
+    if (ball.x + BALL_SIZE >= WIDTH) {
+        score.player1 += 1;
+        io.sockets.emit('score', score);
+        newBall();
+    }
+};
+
+var bounceBackOnHit = function () {
+
+    var player1Touches = ( (ball.x <= HANDLE_WIDTH)
+                        && (ball.y + BALL_SIZE >= player1.y)
+                        && (ball.y <= player1.y + HANDLE_HEIGHT));
+
+    var player2Touches = ( (ball.x + BALL_SIZE >= (WIDTH - HANDLE_WIDTH))
+                        && (ball.y + BALL_SIZE >= player2.y)
+                        && (ball.y <= player2.y + HANDLE_HEIGHT));
+
+
+    if (player1Touches || player2Touches) {
+
+        // accelerate ball in random direction
+        if (offset.x < 2) {
+            offset.x += (offset.x < 0) ? -ACCELERATION : ACCELERATION;
+            offset.y = SPEED * 2 * Math.random(); // arithmetic mean is SPEED
+        }
+
+        offset.x = -offset.x;
+        io.sockets.emit('handle touched');
+    }
+
+};
+
 
 io.sockets.on('connection', function (socket) {
 
-    var resetBallPosition = function () {
-        ball.x = ballposition.x;
-        ball.y = ballposition.y;
-    };
-
-    var resetGame = function () {
-        console.log('stopping game...');
-        player1 = {height: height/2 - handleHeight/2};
-        player2 = {height: height/2 - handleHeight/2};
-        ball = {x: 0, y: 0};
-        offset = {x: 0, y: 0};
-        score = {player1: 0, player2: 0};
-        clearInterval(gameloop);
-        gameloop = undefined;
-        client1 = undefined;
-        client2 = undefined;
-    };
-
-    var resetBall = function () {
-        offset.x = SPEED;
-        offset.y = SPEED;
-        if (Math.random() > 0.5) offset.x = -offset.x;
-        if (Math.random() > 0.5) offset.y = -offset.y;
-        resetBallPosition();
-    };
-
-    var metaData = function (player) {
-        return { handleHeight: handleHeight,
-                 handleWidth: handleWidth,
-                 ballSize: ballSize,
+    var startData = function (player) {
+        return { handleHeight: HANDLE_HEIGHT,
+                 handleWidth: HANDLE_WIDTH,
+                 ballSize: BALL_SIZE,
                  player: player
                };
     };
 
     if (client1 === undefined) {
         client1 = socket;
-        socket.emit('start game', metaData(1));
-        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
+        socket.emit('start game', startData(1));
+        sendHandlePositions();
     } else if (client2 === undefined) {
         client2 = socket;
-        socket.emit('start game', metaData(2));
-        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
+        socket.emit('start game', startData(2));
+        sendHandlePositions();
     } else {
         resetGame();
     }
 
     var moveHandle = function (player, amount) {
-        if (player.height <= 0 && amount < 0 || player.height + handleHeight >= height && amount > 0) return;
-            player.height += amount;
+        if (player.y <= 0 && amount < 0 || player.y + HANDLE_HEIGHT >= HEIGHT && amount > 0) return;
+            player.y += amount;
 
-        // correct game field exceeding caused by non-pixel-value amounts
-        if (player.height < 0) player.height = 0;
-        if (player.height + handleHeight > height) player.height = height - handleHeight;
+        if (player.y < 0) player.y = 0;
+        if (player.y + HANDLE_HEIGHT > HEIGHT) player.y = HEIGHT - HANDLE_HEIGHT;
     };
 
     socket.on('move handle up', function (player) {
-        moveHandle(((player === 1) ? player1 : player2), -2);
-        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
+        moveHandle(((player === 1) ? player1 : player2), -HANDLE_STEP);
+        sendHandlePositions();
     });
 
     socket.on('move handle down', function (player) {
-        moveHandle(((player === 1) ? player1 : player2), 2);
-        io.sockets.emit('handle positions', {player1: player1.height, player2: player2.height});
+        moveHandle(((player === 1) ? player1 : player2), HANDLE_STEP);
+        sendHandlePositions();
     });
 
     var tick = function () {
+
         ball.x += offset.x;
         ball.y += offset.y;
 
-        var player1Touches = ( (ball.x <= handleWidth)
-                            && (ball.y + ballSize >= player1.height)
-                            && (ball.y <= player1.height + handleHeight));
-
-        var player2Touches = ( (ball.x + ballSize >= (width - handleWidth))
-                            && (ball.y + ballSize >= player2.height)
-                            && (ball.y <= player2.height + handleHeight));
-
-
-        if (player1Touches || player2Touches) {
-
-            // accelerate ball
-            var amount = 0.1;
-            if (offset.x < 2) {
-                offset.x += (offset.x < 0) ? -amount : amount;
-                offset.y = SPEED * 2 * Math.random(); // arithmetic mean is SPEED
-            }
-
-            offset.x = -offset.x;
-            io.sockets.emit('handle touched');
-        }
-
-        if (ball.y <= 0 || ball.y + ballSize >= height) {
-            offset.y = -offset.y;
-        }
-
-        if (ball.x <= 0) {
-            score.player2 += 1;
-            io.sockets.emit('score', score);
-            resetBall();
-        }
-
-        if (ball.x + ballSize >= width) {
-            score.player1 += 1;
-            io.sockets.emit('score', score);
-            resetBall();
-        }
+        bounceBackOnHit();
+        bounceBackOnWallCollision();
+        updateScoreIfScored();
 
         io.sockets.emit('ball move', { x: ball.x, y: ball.y });
     };
 
-    resetBall();
+    newBall();
 
     if (!gameloop && client1 && client2) {
         console.log('players connected, starting game...');
-
-        resetBall();
-
+        newBall();
         gameloop = setInterval(tick, 1000/60);
     }
 

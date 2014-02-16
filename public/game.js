@@ -1,27 +1,28 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     var
-      socket        = io.connect(),
+      socket    = io.connect(),
 
-      stage          = document.getElementById('game'),
+      stage     = document.getElementById('game'),
 
-      player1       = document.getElementById('player1'),
-      player2       = document.getElementById('player2'),
-      ball          = document.getElementById('ball'),
+      player1   = document.getElementById('player1'),
+      player2   = document.getElementById('player2'),
+      ball      = document.getElementById('ball'),
 
-      score1       = document.getElementById('score1'),
-      score2       = document.getElementById('score2'),
+      score1    = document.getElementById('score1'),
+      score2    = document.getElementById('score2'),
 
-      me,
+      size      = window.innerWidth > innerHeight ? innerHeight : innerWidth,
+      scale     = size / 100,
 
-      size = window.innerWidth > innerHeight ? innerHeight : innerWidth,
-      scale = size / 100;
+      me;
 
+    // set up stage
     stage.style.width = size + 'px';
     stage.style.height = size + 'px';
 
-    // set up sound
 
+    // set up sound
     var beep;
     if (window.HTMLAudioElement) {
         beep = new Audio('');
