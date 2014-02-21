@@ -6,11 +6,12 @@ var
   jade      = require('jade'),
   app       = express(),
 
-  room,
-  rooms = {};
+  roomName;
 
 
-// setting up express
+/*
+ *  SETTING UP EXPRESS ROUTES
+ */
 
 app.configure (function () {
     app.use(express.static('public'));
@@ -21,34 +22,26 @@ app.get('/', function(req, res) {
 });
 
 app.get('/room/:room', function (req, res) {
-    room = req.params.room;
+    roomName = req.params.room;
     res.render('index.jade');
 });
 
 
-// setting up socket.io
+/*
+ *  SETTING UP SOCKET.IO
+ */
 
 var io = socketIO.listen(app.listen(process.env.PORT || 3000));
 io.set('log level', 1);
 
-var Game = require('./lib/game')(io);
-
-var getGameOfPlayer = function (player) {
-    var room;
-    for(var k in io.sockets.manager.roomClients[player.id])
-        if (k !== '') room = k;
-    return rooms[room.replace('/', '')];
-};
+var rooms = require('./lib/rooms')(io);
 
 io.sockets.on('connection', function (socket) {
 
-    if (room) {
-        if (!rooms[room]) rooms[room] = new Game(room);
-        rooms[room].addPlayer(socket);
-    }
+    rooms.addPlayerToRoom(socket, roomName);
 
-    socket.on('move handle up', function (data) { getGameOfPlayer(socket).moveHandleUp(data); });
-    socket.on('move handle down', function (data) { getGameOfPlayer(socket).moveHandleDown(data); });
-    socket.on('move handle', function (data) { getGameOfPlayer(socket).moveHandleToPosition(data); });
+    socket.on( 'move handle up',     function (data) { rooms.getRoomOfPlayer(socket).moveHandleUp(data); });
+    socket.on( 'move handle down',   function (data) { rooms.getRoomOfPlayer(socket).moveHandleDown(data); });
+    socket.on( 'move handle',        function (data) { rooms.getRoomOfPlayer(socket).moveHandleToPosition(data); });
 
 });
