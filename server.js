@@ -23,7 +23,7 @@ app.get('/', function(req, res) {
 
 app.get('/room/:room', function (req, res) {
     roomName = req.params.room;
-    res.render('index.jade');
+    res.render('game.jade');
 });
 
 

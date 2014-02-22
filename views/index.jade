@@ -4,13 +4,8 @@ html
         title Pong
         link(rel='stylesheet', href='/main.css')
     body
-        #game
-            #divider
-            #score1 0
-            #score2 0
-            #player1.handle
-            #ball
-            #player2.handle
-        #waiting WAITING FOR PLAYER 2...
-        script(src='//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js')
-        script(src='/game.js')
+        #instructions
+            h1 Welcome to pong!
+            p Send the link below to your friend and then click on it.
+            p The game starts when both of you joined the room.
+        script(src='/intro.js')

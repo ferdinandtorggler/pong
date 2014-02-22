@@ -2,7 +2,7 @@
   font-family: "digitalix";
   src: url("digitalix.ttf"); }
 
-* {
+.game * {
   cursor: none; }
 
 .hidden {
@@ -63,3 +63,13 @@ html, body, #game {
   font-size: 10px;
   font-family: "digitalix", sans-serif;
   color: #aaaaaa; }
+
+#instructions {
+  margin-top: 100px;
+  font-family: "digitalix", sans-serif;
+  text-align: center;
+  color: white;
+  text-transform: uppercase; }
+  #instructions a {
+    color: #3a7f28;
+    text-decoration: none; }
