@@ -44,4 +44,6 @@ io.sockets.on('connection', function (socket) {
     socket.on( 'move handle down',   function (data) { rooms.getRoomOfPlayer(socket).moveHandleDown(data); });
     socket.on( 'move handle',        function (data) { rooms.getRoomOfPlayer(socket).moveHandleToPosition(data); });
 
+    socket.on( 'disconnect',         function () { rooms.removePlayerFromRoom(socket); });
+
 });
