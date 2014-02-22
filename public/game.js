@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     socket.on('score', function (data) {
-        console.log(data);
         score1.innerHTML = data.player1;
         score2.innerHTML = data.player2;
         beepScore.play();

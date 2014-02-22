@@ -2,7 +2,7 @@
   font-family: "digitalix";
   src: url("digitalix.ttf"); }
 
-.game * {
+.game {
   cursor: none; }
 
 .hidden {
