@@ -29,10 +29,6 @@ app.get('/room/:room', function (req, res) {
 });
 
 
-/*
- *  SETTING UP SOCKET.IO
- */
-
 var io = socketIO.listen(app.listen(process.env.PORT || 3000));
 io.set('log level', 1);
 
@@ -41,11 +37,6 @@ var rooms = require('./lib/rooms')(io);
 io.sockets.on('connection', function (socket) {
 
     rooms.addPlayerToRoom(socket, roomName);
-
-    socket.on( 'move handle up',     function (data) { rooms.getRoomOfPlayer(socket).moveHandleUp(data); });
-    socket.on( 'move handle down',   function (data) { rooms.getRoomOfPlayer(socket).moveHandleDown(data); });
-    socket.on( 'move handle',        function (data) { rooms.getRoomOfPlayer(socket).moveHandleToPosition(data); });
-
-    socket.on( 'disconnect',         function () { rooms.removePlayerFromRoom(socket); });
+    socket.on( 'disconnect', function () { rooms.removePlayerFromRoom(socket); });
 
 });
