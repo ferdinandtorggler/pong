@@ -58,14 +58,11 @@ document.addEventListener('DOMContentLoaded', function () {
         ball.style.height       = toPixels(data.ballSize) + 'px';
     });
 
-    socket.on('handle positions', function (data) {
-        player1.style.top = toPixels(data.player1) + 'px';
-        player2.style.top = toPixels(data.player2) + 'px';
-    });
-
-    socket.on('ball move', function (data) {
-        ball.style.left = toPixels(data.x) + 'px';
-        ball.style.top = toPixels(data.y) + 'px';
+    socket.on('update field', function (positions) {
+        ball.style.left = toPixels(positions[0]) + 'px';
+        ball.style.top = toPixels(positions[1]) + 'px';
+        player1.style.top = toPixels(positions[2]) + 'px';
+        player2.style.top = toPixels(positions[3]) + 'px';
     });
 
     socket.on('score', function (data) {
