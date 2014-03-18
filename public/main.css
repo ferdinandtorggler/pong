@@ -1,7 +1,6 @@
 @font-face {
   font-family: "digitalix";
   src: url("digitalix.ttf"); }
-
 .game {
   cursor: none; }
 
@@ -12,7 +11,8 @@ html, body, #game {
   position: relative;
   margin: 0;
   padding: 0;
-  background-color: #111111; }
+  background-color: #111111;
+  overflow: hidden; }
 
 #game {
   height: 400px;
